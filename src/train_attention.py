@@ -172,7 +172,7 @@ def main():
     
     # LR Scheduler điều chỉnh dựa trên val_loss
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", factor=0.5, patience=5, verbose=True
+        optimizer, mode="min", factor=0.5, patience=5
     )
     
     # Cấu hình AMP nếu sử dụng GPU và được cấu hình

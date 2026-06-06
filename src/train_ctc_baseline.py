@@ -164,7 +164,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=config.CTC_LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
     
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", factor=0.5, patience=5, verbose=True
+        optimizer, mode="min", factor=0.5, patience=5
     )
     
     scaler = torch.cuda.amp.GradScaler() if config.USE_AMP and device.type == "cuda" else None
