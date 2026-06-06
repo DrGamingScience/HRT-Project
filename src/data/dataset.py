@@ -23,30 +23,38 @@ class HTRDataset(Dataset):
         self.vocab = vocab
         self.transform = transform
         self.is_train = is_train
+        self.cache = {}  # Bộ nhớ đệm RAM lưu ảnh gốc
 
     def __len__(self) -> int:
         return len(self.df)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor, int]:
         """
-        Tải ảnh từ đĩa, áp dụng transform, sinh target tensor và trả về:
+        Tải ảnh từ đĩa (hoặc lấy từ cache RAM), áp dụng transform, sinh target tensor và trả về:
         (image_tensor, target_tensor, target_length)
         """
         row = self.df.iloc[idx]
         image_relative_path = row["image_path"]
         label = str(row["label"])
 
-        # Tạo đường dẫn tuyệt đối đến file ảnh
-        abs_image_path = os.path.join(config.PROJECT_ROOT, image_relative_path)
+        # Kiểm tra ảnh trong cache RAM trước
+        if idx in self.cache:
+            image = self.cache[idx]
+        else:
+            # Tạo đường dẫn tuyệt đối đến file ảnh
+            abs_image_path = os.path.join(config.PROJECT_ROOT, image_relative_path)
 
-        # Đọc ảnh ở dạng grayscale
-        image = cv2.imread(abs_image_path, cv2.IMREAD_GRAYSCALE)
+            # Đọc ảnh ở dạng grayscale
+            image = cv2.imread(abs_image_path, cv2.IMREAD_GRAYSCALE)
 
-        # Cơ chế fallback nếu ảnh không load được (file bị corrupt hoặc mất mát trên đĩa sau khi split)
-        if image is None:
-            print(f"[Cảnh báo] Không thể đọc ảnh: {abs_image_path}. Thử lấy mẫu ngẫu nhiên khác.")
-            random_idx = random.randint(0, len(self) - 1)
-            return self.__getitem__(random_idx)
+            # Cơ chế fallback nếu ảnh không load được (file bị corrupt hoặc mất mát trên đĩa sau khi split)
+            if image is None:
+                print(f"[Cảnh báo] Không thể đọc ảnh: {abs_image_path}. Thử lấy mẫu ngẫu nhiên khác.")
+                random_idx = random.randint(0, len(self) - 1)
+                return self.__getitem__(random_idx)
+            
+            # Lưu vào cache RAM
+            self.cache[idx] = image
 
         # Áp dụng Albumentations transform (nếu có) trước khi resize và pad
         if self.transform is not None:

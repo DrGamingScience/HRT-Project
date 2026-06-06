@@ -1,5 +1,6 @@
 import os
 import argparse
+from functools import partial
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -50,7 +51,7 @@ def evaluate_ctc_test_set(checkpoint_path: str):
         shuffle=False,
         num_workers=config.NUM_WORKERS,
         pin_memory=config.PIN_MEMORY,
-        collate_fn=lambda b: collate_fn(b, vocab.pad_idx)
+        collate_fn=partial(collate_fn, pad_idx=vocab.pad_idx)
     )
     
     print(f"Số lượng mẫu kiểm thử (test set): {len(test_dataset):,}")

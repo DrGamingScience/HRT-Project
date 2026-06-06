@@ -1,4 +1,6 @@
 import os
+import argparse
+from functools import partial
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -50,7 +52,7 @@ def evaluate_test_set(checkpoint_path: str):
         shuffle=False,
         num_workers=config.NUM_WORKERS,
         pin_memory=config.PIN_MEMORY,
-        collate_fn=lambda b: collate_fn(b, vocab.pad_idx)
+        collate_fn=partial(collate_fn, pad_idx=vocab.pad_idx)
     )
     
     print(f"Số lượng mẫu kiểm thử (test set): {len(test_dataset):,}")
@@ -117,7 +119,6 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", type=str, default="checkpoints/best_attention_model.pth",
                         help="Đường dẫn đến file checkpoint (.pth).")
     
-    import argparse
     args = parser.parse_args()
     
     ckpt_path = os.path.abspath(args.checkpoint)

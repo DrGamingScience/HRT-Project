@@ -1,5 +1,6 @@
 import os
 import time
+from functools import partial
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -133,7 +134,8 @@ def main():
         shuffle=True,
         num_workers=config.NUM_WORKERS,
         pin_memory=config.PIN_MEMORY,
-        collate_fn=lambda b: collate_fn(b, vocab.pad_idx)
+        persistent_workers=(config.NUM_WORKERS > 0),
+        collate_fn=partial(collate_fn, pad_idx=vocab.pad_idx)
     )
     val_loader = DataLoader(
         val_dataset,
@@ -141,7 +143,8 @@ def main():
         shuffle=False,
         num_workers=config.NUM_WORKERS,
         pin_memory=config.PIN_MEMORY,
-        collate_fn=lambda b: collate_fn(b, vocab.pad_idx)
+        persistent_workers=(config.NUM_WORKERS > 0),
+        collate_fn=partial(collate_fn, pad_idx=vocab.pad_idx)
     )
     
     print(f"Số lượng mẫu huấn luyện: {len(train_dataset):,}")

@@ -43,7 +43,7 @@ DECODER_NUM_LAYERS = 1
 DROPOUT = 0.3
 
 # --- Training ---
-BATCH_SIZE = 64
+BATCH_SIZE = 256
 NUM_EPOCHS = 80
 LEARNING_RATE_DECODER = 1e-3
 LEARNING_RATE_ENCODER = 1e-5
@@ -53,12 +53,12 @@ TEACHER_FORCING_DECAY = 0.01    # Giảm dần mỗi epoch
 GRAD_CLIP = 5.0
 EARLY_STOPPING_PATIENCE = 10
 USE_AMP = True                  # Mixed precision
-
+ 
 # --- Data ---
 TRAIN_RATIO = 0.8
 VAL_RATIO = 0.1
 TEST_RATIO = 0.1
-NUM_WORKERS = 0                 # 0 cho Windows an toàn
+NUM_WORKERS = 4                 # Đã tăng từ 0 lên 4 để tối ưu hóa đa luồng trên Windows
 PIN_MEMORY = True
 RANDOM_SEED = 42
 
@@ -69,7 +69,7 @@ BEAM_WIDTH = 5
 CTC_HIDDEN_DIM = 256
 CTC_NUM_LAYERS = 2
 CTC_LEARNING_RATE = 1e-3
-CTC_BATCH_SIZE = 64
+CTC_BATCH_SIZE = 256
 CTC_EPOCHS = 50
 
 # --- Device ---
