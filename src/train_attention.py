@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+from typing import Tuple, Optional
 
 import src.config as config
 from src.data.vocab import Vocabulary
