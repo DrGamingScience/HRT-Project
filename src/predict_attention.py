@@ -1,8 +1,13 @@
 import os
+import sys
+import io
 import argparse
 import cv2
 import torch
 import numpy as np
+
+# Ép kiểu stdout sử dụng UTF-8 trên Windows để tránh crash khi in tiếng Việt
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 import src.config as config
 from src.data.vocab import Vocabulary

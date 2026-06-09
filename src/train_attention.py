@@ -196,9 +196,9 @@ def main():
         start_time = time.time()
         
         # --- Quản lý các Phase huấn luyện ---
-        # Epoch 0 - 9 (10 epochs đầu): Phase 1 - Chỉ huấn luyện Decoder (Encoder đóng băng)
-        # Epoch 10 trở đi: Phase 2 - Unfreeze layer3+layer4 để fine-tune toàn bộ
-        if epoch == 10:
+        # Epoch 0 - 4 (5 epochs đầu): Phase 1 - Chỉ huấn luyện Decoder (Encoder đóng băng)
+        # Epoch 5 trở đi: Phase 2 - Unfreeze layer3+layer4 để fine-tune toàn bộ
+        if epoch == 5:
             print("\n>>> Chuyển sang Phase 2: Mở đóng băng encoder từ layer3 để fine-tune...")
             model.unfreeze_encoder(from_layer="layer3")
             # In thông tin kiểm tra grad của mô hình

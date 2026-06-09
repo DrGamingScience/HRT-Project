@@ -25,15 +25,17 @@ class MorphologicalTransform(ImageOnlyTransform):
 def get_train_transform() -> A.Compose:
     """
     Trả về pipeline augmentation cho training:
-    - Xoay nhẹ ±8 độ
-    - Co/Giãn nét nhẹ
+    - Xoay ngẫu nhiên ±15 độ (để học cách nhận diện chữ nghiêng)
+    - Xiên nét (shear) ngẫu nhiên ±15 độ (xác suất 0.5)
+    - Biến dạng đàn hồi ElasticTransform (để mô phỏng nét viết tay tự nhiên)
     - Blur nhẹ
     - Thêm Gaussian noise
     - Tăng giảm độ sáng/độ tương phản
     """
     return A.Compose([
-        A.Rotate(limit=8, p=0.5, border_mode=cv2.BORDER_CONSTANT, fill=255),
-        A.Affine(shear=(-10, 10), p=0.3, border_mode=cv2.BORDER_CONSTANT, fill=255),
+        A.Rotate(limit=15, p=0.5, border_mode=cv2.BORDER_CONSTANT, fill=255),
+        A.Affine(shear=(-15, 15), p=0.5, border_mode=cv2.BORDER_CONSTANT, fill=255),
+        A.ElasticTransform(alpha=1, sigma=50, alpha_affine=50, p=0.3, border_mode=cv2.BORDER_CONSTANT, fill_value=255),
         A.GaussianBlur(blur_limit=3, sigma_limit=(0.1, 1.5), p=0.3),
         A.GaussNoise(std_range=(0.04, 0.12), p=0.3),
         A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.3),

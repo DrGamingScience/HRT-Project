@@ -45,6 +45,10 @@ python -m src.prepare_data
   ```bash
   python -m src.evaluate_ctc_baseline
   ```
+- **Nhận dạng ảnh đơn lẻ** (Nhận dạng từ của ảnh bằng mô hình đối chứng):
+  ```bash
+  python -m src.predict_ctc --image đường_dẫn_ảnh.png
+  ```
 
 ## Cấu hình hệ thống
 Toàn bộ siêu tham số (Epochs, Batch size, LR, Hidden dim) và đường dẫn thư mục được tập trung cấu hình tại [src/config.py](file:///d:/Downloads/HRT-Project/src/config.py).

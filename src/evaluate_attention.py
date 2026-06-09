@@ -12,15 +12,20 @@ from src.data.dataset import HTRDataset, collate_fn
 from src.data.transforms import get_val_transform
 from src.models.attention_model import AttentionHTR
 from src.inference.greedy_decode import greedy_decode
+from src.inference.beam_search import beam_search_decode
 from src.utils.metrics import compute_all_metrics, edit_distance
 from src.utils.checkpoint import load_checkpoint
 
-def evaluate_test_set(checkpoint_path: str):
+def evaluate_test_set(checkpoint_path: str, use_beam: bool = False):
     """
     Đánh giá mô hình Attention trên toàn bộ test set và ghi nhận kết quả.
+    - use_beam: Nếu True, sử dụng Beam Search Decode thay vì Greedy Decode.
     """
     device = torch.device(config.DEVICE)
     print(f"Đánh giá mô hình trên thiết bị: {device}")
+    print(f"Chế độ giải mã: {'Beam Search' if use_beam else 'Greedy Decode'}")
+    if use_beam:
+        print(f"Độ rộng Beam (Beam Width): {config.BEAM_WIDTH}")
     
     # 1. Khởi tạo vocab và tải mô hình
     vocab = Vocabulary(config.VOCAB_CHARS)
@@ -66,15 +71,29 @@ def evaluate_test_set(checkpoint_path: str):
         for images, targets, target_lengths in tqdm(test_loader, desc="Testing"):
             images = images.to(device)
             
-            # Greedy decoding
-            decoded_words, _ = greedy_decode(
-                model=model,
-                images=images,
-                vocab=vocab,
-                device=device,
-                max_len=config.MAX_LABEL_LENGTH
-            )
-            all_predictions.extend(decoded_words)
+            if use_beam:
+                # Giải mã bằng Beam Search (duyệt từng ảnh trong batch)
+                for i in range(images.size(0)):
+                    img = images[i]  # shape: (3, H, W)
+                    pred_word, _ = beam_search_decode(
+                        model=model,
+                        image=img,
+                        vocab=vocab,
+                        device=device,
+                        beam_width=config.BEAM_WIDTH,
+                        max_len=config.MAX_LABEL_LENGTH
+                    )
+                    all_predictions.append(pred_word)
+            else:
+                # Giải mã bằng Greedy Decode (mặc định)
+                decoded_words, _ = greedy_decode(
+                    model=model,
+                    images=images,
+                    vocab=vocab,
+                    device=device,
+                    max_len=config.MAX_LABEL_LENGTH
+                )
+                all_predictions.extend(decoded_words)
             
             # Lấy ground truth labels
             for i in range(targets.size(0)):
@@ -104,7 +123,7 @@ def evaluate_test_set(checkpoint_path: str):
     
     # 6. In ra summary kết quả đánh giá theo đúng format yêu cầu
     print("\n" + "=" * 60)
-    print("          EVALUATION RESULTS - ATTENTION MODEL")
+    print(f"          EVALUATION RESULTS - ATTENTION MODEL")
     print("=" * 60)
     print(f"Test samples:                    {len(test_dataset):,}")
     print(f"Word Accuracy:                   {metrics['word_accuracy']:.2f}%")
@@ -118,8 +137,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate Attention HTR Model on Test Set.")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/best_attention_model.pth",
                         help="Đường dẫn đến file checkpoint (.pth).")
+    parser.add_argument("--beam", action="store_true", help="Sử dụng giải mã Beam Search thay vì Greedy Decode.")
     
     args = parser.parse_args()
     
     ckpt_path = os.path.abspath(args.checkpoint)
-    evaluate_test_set(ckpt_path)
+    evaluate_test_set(ckpt_path, use_beam=args.beam)

@@ -184,8 +184,8 @@ def main():
     for epoch in range(config.CTC_EPOCHS):
         start_time = time.time()
         
-        # Giải đóng băng encoder tại epoch thứ 10 để fine-tune (nhất quán với Attention)
-        if epoch == 10:
+        # Giải đóng băng encoder tại epoch thứ 5 để fine-tune (nhất quán với Attention)
+        if epoch == 5:
             print("\n>>> Giải đóng băng encoder để fine-tune...")
             model.unfreeze_encoder(from_layer="layer3")
             

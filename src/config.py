@@ -25,7 +25,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 # --- Image ---
 IMAGE_HEIGHT = 64
-IMAGE_WIDTH = 256
+IMAGE_WIDTH = 512
 IMAGE_CHANNELS = 3         # 3 vì ResNet18 pretrained cần RGB
 
 # --- Vocabulary ---
@@ -46,7 +46,7 @@ DROPOUT = 0.3
 BATCH_SIZE = 256
 NUM_EPOCHS = 80
 LEARNING_RATE_DECODER = 1e-3
-LEARNING_RATE_ENCODER = 1e-5
+LEARNING_RATE_ENCODER = 5e-5
 WEIGHT_DECAY = 1e-5
 TEACHER_FORCING_RATIO = 0.5
 TEACHER_FORCING_DECAY = 0.01    # Giảm dần mỗi epoch
@@ -63,7 +63,7 @@ PIN_MEMORY = True
 RANDOM_SEED = 42
 
 # --- Inference ---
-BEAM_WIDTH = 5
+BEAM_WIDTH = 2
 
 # --- CTC Baseline ---
 CTC_HIDDEN_DIM = 256
