@@ -135,7 +135,7 @@ def evaluate_test_set(checkpoint_path: str, use_beam: bool = False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate Attention HTR Model on Test Set.")
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/best_attention_model.pth",
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/attention_bilstm/best_attention_model.pth",
                         help="Đường dẫn đến file checkpoint (.pth).")
     parser.add_argument("--beam", action="store_true", help="Sử dụng giải mã Beam Search thay vì Greedy Decode.")
     

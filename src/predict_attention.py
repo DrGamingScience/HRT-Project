@@ -96,7 +96,7 @@ def predict_single_image(image_path: str, checkpoint_path: str, save_attention: 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Predict single handwriting image using Attention HTR Model.")
     parser.add_argument("--image", type=str, required=True, help="Đường dẫn đến file ảnh cần nhận dạng.")
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/best_attention_model.pth", 
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/attention_bilstm/best_attention_model.pth", 
                         help="Đường dẫn đến file checkpoint (.pth).")
     parser.add_argument("--save_attention", action="store_true", help="Cờ kích hoạt trực quan hóa và lưu bản đồ Attention.")
     

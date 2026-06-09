@@ -21,12 +21,9 @@ def greedy_decode(model: torch.nn.Module, images: torch.Tensor, vocab: Vocabular
     batch_size = images.size(0)
     
     with torch.no_grad():
-        # 1. Trích xuất đặc trưng qua Encoder: (B, C, H', W')
-        enc_features = model.encoder(images)
-        B, C, H_prime, W_prime = enc_features.shape
-        
-        # Reshape: (B, W', C * H') làm đầu vào dạng chuỗi
-        enc_seq = enc_features.permute(0, 3, 1, 2).contiguous().view(B, W_prime, C * H_prime)
+        # 1. Trích xuất đặc trưng qua mô hình (bao gồm BiLSTM ngữ cảnh)
+        enc_seq = model.extract_features(images)
+        W_prime = enc_seq.size(1)
         
         # 2. Khởi tạo hidden state cho Decoder
         hidden = model.decoder.init_hidden(enc_seq)

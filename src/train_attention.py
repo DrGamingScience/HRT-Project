@@ -167,10 +167,18 @@ def main():
     # Bỏ qua pad_idx (0) khi tính loss
     criterion = nn.CrossEntropyLoss(ignore_index=vocab.pad_idx)
     
-    # Thiết lập 2 param groups với LR khác nhau
+    # Phân chia tham số an toàn theo yêu cầu của Phase 1
+    encoder_params = []
+    decoder_params = []
+    for name, param in model.named_parameters():
+        if name.startswith("encoder."):
+            encoder_params.append(param)
+        else:
+            decoder_params.append(param)
+            
     optimizer = torch.optim.Adam([
-        {"params": model.decoder.parameters(), "lr": config.LEARNING_RATE_DECODER},
-        {"params": model.encoder.parameters(), "lr": config.LEARNING_RATE_ENCODER}
+        {"params": decoder_params, "lr": config.LEARNING_RATE_DECODER},
+        {"params": encoder_params, "lr": config.LEARNING_RATE_ENCODER}
     ], weight_decay=config.WEIGHT_DECAY)
     
     # LR Scheduler điều chỉnh dựa trên val_loss
@@ -189,7 +197,7 @@ def main():
     # Các biến theo dõi huấn luyện
     best_cer = float("inf")
     epochs_no_improve = 0
-    checkpoint_filename = os.path.join(config.CHECKPOINT_DIR, "last_attention_model.pth")
+    checkpoint_filename = os.path.join(config.CHECKPOINT_DIR, "attention_bilstm", "last_attention_model.pth")
     
     # 6. Vòng lặp huấn luyện chính
     for epoch in range(config.NUM_EPOCHS):

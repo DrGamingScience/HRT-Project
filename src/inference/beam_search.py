@@ -24,10 +24,9 @@ def beam_search_decode(model: torch.nn.Module, image: torch.Tensor, vocab: Vocab
         
     model.eval()
     with torch.no_grad():
-        # 1. Trích xuất đặc trưng qua Encoder
-        enc_features = model.encoder(image.to(device))
-        B, C, H_prime, W_prime = enc_features.shape
-        enc_seq = enc_features.permute(0, 3, 1, 2).contiguous().view(B, W_prime, C * H_prime)
+        # 1. Trích xuất đặc trưng qua mô hình (bao gồm BiLSTM ngữ cảnh)
+        enc_seq = model.extract_features(image.to(device))
+        W_prime = enc_seq.size(1)
         
         # 2. Khởi tạo hidden state cho Decoder
         h0 = model.decoder.init_hidden(enc_seq)
