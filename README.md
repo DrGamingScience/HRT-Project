@@ -1,6 +1,6 @@
 # Word-Level Handwritten Text Recognition (HTR)
 
-Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử dụng PyTorch chạy local. Mô hình được xây dựng theo kiến trúc **ResNet18 + BiLSTM + Bahdanau Attention + GRU Decoder**, đạt **83.09% Word Accuracy** và **7.06% CER** trên tập kiểm thử IAM.
+Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử dụng PyTorch chạy local. Mô hình được xây dựng theo kiến trúc **ResNet18 + BiLSTM + Bahdanau Attention + GRU Decoder**, đạt **83.09% Word Accuracy** và **7.06% CER** trên tập kiểm thử IAM (96,835 mẫu).
 
 ---
 
@@ -36,9 +36,18 @@ Sau khi kích hoạt môi trường:
 python -m pip install -r requirements.txt
 ```
 
-### 2. Tải checkpoint mô hình
-Do file checkpoint nặng, vui lòng tải trọng số đã train sẵn về và đặt đúng cấu trúc thư mục ở trên:
-*   [Tải best_attention_model.pth (Google Drive)](#) *(Chèn link của bạn tại đây)*
+### 2. Tải dữ liệu & checkpoint
+Do kích thước lớn, các file nặng được lưu trên Google Drive. Tải về và đặt đúng cấu trúc thư mục:
+
+| File | Mô tả | Link |
+|---|---|---|
+| `dataset/` (IAM words) | Ảnh + nhãn gốc (~1.1 GB) | [Tải dataset](https://drive.google.com/file/d/1uC2H2NCVvU1pPz-OId8KKfJiyI3nq5lj/view?usp=sharing) |
+| `best_attention_model.pth` | Checkpoint tốt nhất (~91 MB) | [Tải checkpoint](https://drive.google.com/file/d/1yuN5fDkaIQ7PCj3Q-Kq5-muftEd0w8_a/view?usp=sharing) |
+
+Sau khi tải checkpoint, đặt file vào đúng vị trí:
+```
+checkpoints/attention_bilstm/best_attention_model.pth
+```
 
 ### 3. Chuẩn bị dữ liệu
 Đặt bộ dữ liệu IAM vào thư mục `dataset/` (gồm file `label.txt` và thư mục `words/`). Sau đó chạy lệnh chia tập dữ liệu:
@@ -52,11 +61,13 @@ python -m src.evaluate_attention
 ```
 
 ### 5. Chạy dự đoán thực tế
+> **Lưu ý:** Tham số `--image` nhận được cả **đường dẫn file ảnh** lẫn **đường dẫn thư mục**.
+
 ```bash
-# Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý (lưu tại outputs/):
+# Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý (lưu tại outputs/attention_maps/):
 python -m src.predict_attention --image duong_dan_anh.png --save_attention
 
-# Nhận dạng toàn bộ ảnh trong một thư mục (tên file = nhãn chuẩn):
+# Nhận dạng toàn bộ ảnh trong một thư mục (tên file không có đuôi = nhãn chuẩn để tính WA/CER):
 python -m src.predict_attention --image duong_dan_thu_muc/
 ```
 
