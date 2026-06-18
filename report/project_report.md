@@ -65,12 +65,12 @@ $$\text{Image} \rightarrow \text{CNN (ResNet18)} \rightarrow \text{Sequence Resh
 | **Hạn chế** | Chiều dài đầu ra bị giới hạn bởi $T$ (16 bước); giả định conditional independence giữa các ký tự | Phức tạp hơn, cần teacher forcing, huấn luyện chậm hơn |
 
 ### 2.4. Sự cần thiết của bộ giải mã độc lập (inference/)
-Một câu hỏi lý luận quan trọng thường gặp khi bảo vệ đồ án là: *Tại sao khi đã có các file dự đoán (`predict_attention.py`) và đánh giá (`evaluate_attention.py`) nhưng hệ thống vẫn cần một thư mục riêng biệt là `inference/`?*
+Một câu hỏi lý luận quan trọng thường gặp khi bảo vệ đồ án là: *Tại sao khi đã có các file dự đoán (`src/attention_bilstm/predict.py`) và đánh giá (`src/attention_bilstm/evaluate.py`) nhưng hệ thống vẫn cần một thư mục riêng biệt là `inference/`?*
 
 Lý do nằm ở sự phân tách trách nhiệm (Separation of Concerns) trong thiết kế hệ thống và bản chất của mô hình học sâu:
 1.  **Bản chất đầu ra của mô hình:** Các mạng nơ-ron chỉ làm nhiệm vụ tính toán và trả về các tensor chứa phân phối xác suất thô của các ký tự. Bản thân mô hình AI không tự sinh ra văn bản mà chỉ đưa ra xác suất.
 2.  **Độc lập về giải thuật giải mã (Decoding Algorithms):** Việc chuyển đổi từ ma trận xác suất sang chuỗi chữ viết có nghĩa (ví dụ: CTC Greedy Decoding, tìm kiếm tham lam Greedy hoặc tìm kiếm chùm Beam Search) là các thuật toán logic độc lập với mô hình học sâu. Cả hai mô hình CTC và Attention đều cần bộ giải mã riêng biệt, được tổ chức gọn gàng trong thư mục `inference/`.
-3.  **Tái sử dụng mã nguồn và dễ bảo trì (Modular Design):** Cả tiến trình đánh giá tập test (`evaluate_*.py`) và tiến trình dự đoán ảnh (`predict_*.py`) đều cần dịch ma trận xác suất thành chữ. Việc tách các giải thuật này vào thư mục `inference/` giúp tránh trùng lặp code, đồng thời cho phép dễ dàng nâng cấp hoặc thay thế thuật toán giải mã mà không cần sửa đổi cấu trúc mô hình.
+3.  **Tái sử dụng mã nguồn và dễ bảo trì (Modular Design):** Cả tiến trình đánh giá tập test (`src/*/evaluate.py`) và tiến trình dự đoán ảnh (`src/*/predict.py`) đều cần dịch ma trận xác suất thành chữ. Việc tách các giải thuật này vào thư mục `inference/` giúp tránh trùng lặp code, đồng thời cho phép dễ dàng nâng cấp hoặc thay thế thuật toán giải mã mà không cần sửa đổi cấu trúc mô hình.
 
 ---
 
@@ -141,7 +141,7 @@ Kết quả thực tế thu được từ checkpoint tốt nhất của cả hai
 | **Epoch đạt kết quả tốt nhất** | — | Epoch 62 / 80 |
 | **Dung lượng file checkpoint** | ~75 MB | ~91 MB |
 
-> **Ghi chú:** Kết quả CTC Baseline sẽ được cập nhật sau khi chạy lệnh: `python -m src.evaluate_ctc_baseline`
+> **Ghi chú:** Kết quả CTC Baseline sẽ được cập nhật sau khi chạy lệnh: `python -m src.ctc_baseline.evaluate`
 
 ### 5.4. Phân tích & Lập luận khoa học
 
@@ -173,7 +173,7 @@ Một trong những ưu điểm lớn nhất của mô hình Attention so với 
 *   **Trực quan hóa:** Sử dụng thư viện `matplotlib` vẽ lớp màu nhiệt (heatmap overlay) chồng lên ảnh gốc. Khi mô hình dự đoán đúng ký tự thứ $i$, vùng màu sáng nhất sẽ nằm chính xác tại vị trí nét chữ của ký tự đó trên ảnh. Điều này giúp tăng tính thuyết phục khi bảo vệ đồ án trước hội đồng chấm thi.
 *   **Lệnh chạy:**
     ```bash
-    python -m src.predict_attention --image duong_dan_anh.png --save_attention
+    python -m src.attention_bilstm.predict --image duong_dan_anh.png --save_attention
     ```
     *(Kết quả heatmap được lưu tại `outputs/attention_maps/`)*
 

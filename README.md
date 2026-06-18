@@ -26,12 +26,14 @@ HRT-Project/
 │   │   ├── greedy_decode.py       #   └─ Attention Greedy Decoding
 │   │   └── beam_search.py         #   └─ Attention Beam Search
 │   ├── utils/                      # Tiện ích (metrics, checkpoint, seed, visualization)
-│   ├── train_ctc_baseline.py      # Script huấn luyện CTC Baseline
-│   ├── train_attention.py         # Script huấn luyện Attention Model
-│   ├── evaluate_ctc_baseline.py   # Đánh giá CTC trên Test Set
-│   ├── evaluate_attention.py      # Đánh giá Attention trên Test Set
-│   ├── predict_ctc.py             # Dự đoán bằng CTC (ảnh đơn / thư mục)
-│   ├── predict_attention.py       # Dự đoán bằng Attention (ảnh đơn / thư mục)
+│   ├── ctc_baseline/               # Pipeline mô hình CTC Baseline
+│   │   ├── train.py                #   └─ Script huấn luyện
+│   │   ├── evaluate.py             #   └─ Đánh giá trên Test Set
+│   │   └── predict.py              #   └─ Dự đoán ảnh đơn / thư mục
+│   ├── attention_bilstm/           # Pipeline mô hình Attention Model
+│   │   ├── train.py                #   └─ Script huấn luyện
+│   │   ├── evaluate.py             #   └─ Đánh giá trên Test Set
+│   │   └── predict.py              #   └─ Dự đoán ảnh đơn / thư mục
 │   └── prepare_data.py            # Tiền xử lý & chia dữ liệu
 ├── report/                         # Báo cáo kỹ thuật chi tiết phục vụ viết báo cáo/LaTeX
 │   └── project_report.md           # [BÁO CÁO TỔNG HỢP DUY NHẤT]
@@ -82,10 +84,10 @@ python -m src.prepare_data
 ### 4. Đánh giá mô hình trên tập kiểm thử (Test Set)
 ```bash
 # Đánh giá CTC Baseline:
-python -m src.evaluate_ctc_baseline
+python -m src.ctc_baseline.evaluate
 
 # Đánh giá Attention Model:
-python -m src.evaluate_attention
+python -m src.attention_bilstm.evaluate
 ```
 
 ### 5. Chạy dự đoán thực tế
@@ -94,17 +96,17 @@ python -m src.evaluate_attention
 ```bash
 # --- CTC Baseline ---
 # Nhận dạng một ảnh đơn lẻ:
-python -m src.predict_ctc --image duong_dan_anh.png
+python -m src.ctc_baseline.predict --image duong_dan_anh.png
 
 # Nhận dạng toàn bộ ảnh trong thư mục (tên file không có đuôi = nhãn chuẩn):
-python -m src.predict_ctc --image duong_dan_thu_muc/
+python -m src.ctc_baseline.predict --image duong_dan_thu_muc/
 
 # --- Attention Model ---
 # Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý:
-python -m src.predict_attention --image duong_dan_anh.png --save_attention
+python -m src.attention_bilstm.predict --image duong_dan_anh.png --save_attention
 
 # Nhận dạng toàn bộ ảnh trong thư mục:
-python -m src.predict_attention --image duong_dan_thu_muc/
+python -m src.attention_bilstm.predict --image duong_dan_thu_muc/
 ```
 
 ---
@@ -125,13 +127,13 @@ python -m src.predict_attention --image duong_dan_thu_muc/
 
 #### B1. CTC Baseline
 ```bash
-python -m src.train_ctc_baseline
+python -m src.ctc_baseline.train
 ```
 *Huấn luyện CTC Baseline qua 50 epoch, tự động đóng băng Encoder 5 epoch đầu rồi mở khóa fine-tune. Checkpoint tốt nhất lưu tại `checkpoints/ctc_baseline/best_ctc_baseline.pth`.*
 
 #### B2. Attention Model
 ```bash
-python -m src.train_attention
+python -m src.attention_bilstm.train
 ```
 *Huấn luyện Attention Model qua 80 epoch với Teacher Forcing giảm dần. Checkpoint tốt nhất lưu tại `checkpoints/attention_bilstm/best_attention_model.pth`.*
 
@@ -139,42 +141,42 @@ python -m src.train_attention
 
 #### C1. CTC Baseline
 ```bash
-python -m src.evaluate_ctc_baseline --checkpoint checkpoints/ctc_baseline/best_ctc_baseline.pth
+python -m src.ctc_baseline.evaluate --checkpoint checkpoints/ctc_baseline/best_ctc_baseline.pth
 ```
 *(Dự đoán chi tiết từng ảnh được lưu ra file `outputs/predictions_ctc.csv`)*
 
 #### C2. Attention Model
 Đánh giá độ chính xác (Word Accuracy, CER, NED) trên 9,684 mẫu test:
 ```bash
-python -m src.evaluate_attention --checkpoint checkpoints/attention_bilstm/best_attention_model.pth
+python -m src.attention_bilstm.evaluate --checkpoint checkpoints/attention_bilstm/best_attention_model.pth
 ```
 *(Dự đoán chi tiết từng ảnh được lưu ra file `outputs/predictions.csv`)*
 
 ### D. Nhận dạng ảnh thực tế
 
-#### D1. CTC Baseline (`src.predict_ctc`)
+#### D1. CTC Baseline (`src.ctc_baseline.predict`)
 *   **Ảnh đơn lẻ:**
     ```bash
-    python -m src.predict_ctc --image duong_dan_anh.png
+    python -m src.ctc_baseline.predict --image duong_dan_anh.png
     ```
 *   **Toàn bộ thư mục ảnh (tên file = nhãn chuẩn):**
     ```bash
-    python -m src.predict_ctc --image duong_dan_thu_muc/
+    python -m src.ctc_baseline.predict --image duong_dan_thu_muc/
     ```
 
-#### D2. Attention Model (`src.predict_attention`)
+#### D2. Attention Model (`src.attention_bilstm.predict`)
 *   **Ảnh đơn lẻ (Greedy Decode & Lưu Attention Map):**
     ```bash
-    python -m src.predict_attention --image duong_dan_anh.png --save_attention
+    python -m src.attention_bilstm.predict --image duong_dan_anh.png --save_attention
     ```
     *(Ảnh trực quan hóa attention heatmap được lưu tại `outputs/attention_maps/`)*
 *   **Ảnh đơn lẻ (Beam Search nâng cao):**
     ```bash
-    python -m src.predict_attention --image duong_dan_anh.png --beam
+    python -m src.attention_bilstm.predict --image duong_dan_anh.png --beam
     ```
 *   **Toàn bộ thư mục ảnh (tên file = nhãn chuẩn):**
     ```bash
-    python -m src.predict_attention --image duong_dan_thu_muc/
+    python -m src.attention_bilstm.predict --image duong_dan_thu_muc/
     ```
 
 </details>
