@@ -1,6 +1,11 @@
 # Word-Level Handwritten Text Recognition (HTR)
 
-Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử dụng PyTorch chạy local. Mô hình được xây dựng theo kiến trúc **ResNet18 + BiLSTM + Bahdanau Attention + GRU Decoder**, đạt **83.09% Word Accuracy** và **7.06% CER** trên tập kiểm thử IAM (96,835 mẫu).
+Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử dụng PyTorch chạy local. Dự án xây dựng và so sánh **hai kiến trúc** trên bộ dữ liệu IAM (96,835 mẫu):
+
+| Mô hình | Kiến trúc | Word Accuracy | CER |
+|---|---|---|---|
+| **CTC Baseline** | ResNet18 + BiLSTM + CTC Loss | *(chạy evaluate để cập nhật)* | *(chạy evaluate để cập nhật)* |
+| **Attention (Proposed)** | ResNet18 + BiLSTM + Bahdanau Attention + GRU Decoder | **83.09%** | **7.06%** |
 
 ---
 
@@ -10,16 +15,32 @@ Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử d�
 HRT-Project/
 ├── src/                            # Mã nguồn chính của dự án
 │   ├── data/                       # Dataloader, transforms và vocab
-│   ├── models/                     # Kiến trúc mô hình Attention
-│   ├── inference/                  # Các giải thuật giải mã (Greedy, Beam Search)
-│   └── utils/                      # Tiện ích (metrics, checkpoint, seed, visualization)
+│   ├── models/                     # Kiến trúc mô hình
+│   │   ├── ctc_baseline.py        #   └─ CTC Baseline (ResNet18 + BiLSTM + CTC)
+│   │   ├── resnet_encoder.py      #   └─ CNN Encoder dùng chung
+│   │   ├── attention.py           #   └─ Bahdanau Attention
+│   │   ├── attention_model.py     #   └─ Attention Model tổng hợp
+│   │   └── gru_decoder.py         #   └─ GRU Decoder
+│   ├── inference/                  # Các giải thuật giải mã
+│   │   ├── ctc_decode.py          #   └─ CTC Greedy Decoding
+│   │   ├── greedy_decode.py       #   └─ Attention Greedy Decoding
+│   │   └── beam_search.py         #   └─ Attention Beam Search
+│   ├── utils/                      # Tiện ích (metrics, checkpoint, seed, visualization)
+│   ├── train_ctc_baseline.py      # Script huấn luyện CTC Baseline
+│   ├── train_attention.py         # Script huấn luyện Attention Model
+│   ├── evaluate_ctc_baseline.py   # Đánh giá CTC trên Test Set
+│   ├── evaluate_attention.py      # Đánh giá Attention trên Test Set
+│   ├── predict_ctc.py             # Dự đoán bằng CTC (ảnh đơn / thư mục)
+│   ├── predict_attention.py       # Dự đoán bằng Attention (ảnh đơn / thư mục)
+│   └── prepare_data.py            # Tiền xử lý & chia dữ liệu
 ├── report/                         # Báo cáo kỹ thuật chi tiết phục vụ viết báo cáo/LaTeX
 │   └── project_report.md           # [BÁO CÁO TỔNG HỢP DUY NHẤT]
 ├── powerpoint/                     # Tài liệu phục vụ thiết kế slide thuyết trình
 │   └── slides_outline.md           # Dàn ý chi tiết 10 slide thuyết trình & lời thoại gợi ý
-├── checkpoints/                    # Thư mục chứa trọng số mô hình tốt nhất (.pth)
+├── checkpoints/                    # Thư mục chứa trọng số mô hình (.pth)
+│   ├── best_ctc_baseline.pth      #   └─ Checkpoint tốt nhất CTC Baseline
 │   └── attention_bilstm/
-│       └── best_attention_model.pth
+│       └── best_attention_model.pth #  └─ Checkpoint tốt nhất Attention
 ├── dataset/                        # Dữ liệu ảnh words/ và nhãn label.txt (Tải riêng)
 ├── requirements.txt                # Danh sách thư viện phụ thuộc
 └── README.md                       # Hướng dẫn nhanh này
@@ -42,11 +63,13 @@ Do kích thước lớn, các file nặng được lưu trên Google Drive. Tả
 | File | Mô tả | Link |
 |---|---|---|
 | `dataset/` (IAM words) | Ảnh + nhãn gốc (~1.1 GB) | [Tải dataset](https://drive.google.com/file/d/1uC2H2NCVvU1pPz-OId8KKfJiyI3nq5lj/view?usp=sharing) |
-| `best_attention_model.pth` | Checkpoint tốt nhất (~91 MB) | [Tải checkpoint](https://drive.google.com/file/d/1yuN5fDkaIQ7PCj3Q-Kq5-muftEd0w8_a/view?usp=sharing) |
+| `best_attention_model.pth` | Checkpoint Attention (~91 MB) | [Tải checkpoint](https://drive.google.com/file/d/1yuN5fDkaIQ7PCj3Q-Kq5-muftEd0w8_a/view?usp=sharing) |
+| `best_ctc_baseline.pth` | Checkpoint CTC Baseline (~75 MB) | *(có sẵn trong repo)* |
 
 Sau khi tải checkpoint, đặt file vào đúng vị trí:
 ```
 checkpoints/attention_bilstm/best_attention_model.pth
+checkpoints/best_ctc_baseline.pth
 ```
 
 ### 3. Chuẩn bị dữ liệu
@@ -57,6 +80,10 @@ python -m src.prepare_data
 
 ### 4. Đánh giá mô hình trên tập kiểm thử (Test Set)
 ```bash
+# Đánh giá CTC Baseline:
+python -m src.evaluate_ctc_baseline
+
+# Đánh giá Attention Model:
 python -m src.evaluate_attention
 ```
 
@@ -64,10 +91,18 @@ python -m src.evaluate_attention
 > **Lưu ý:** Tham số `--image` nhận được cả **đường dẫn file ảnh** lẫn **đường dẫn thư mục**.
 
 ```bash
-# Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý (lưu tại outputs/attention_maps/):
+# --- CTC Baseline ---
+# Nhận dạng một ảnh đơn lẻ:
+python -m src.predict_ctc --image duong_dan_anh.png
+
+# Nhận dạng toàn bộ ảnh trong thư mục (tên file không có đuôi = nhãn chuẩn):
+python -m src.predict_ctc --image duong_dan_thu_muc/
+
+# --- Attention Model ---
+# Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý:
 python -m src.predict_attention --image duong_dan_anh.png --save_attention
 
-# Nhận dạng toàn bộ ảnh trong một thư mục (tên file không có đuôi = nhãn chuẩn để tính WA/CER):
+# Nhận dạng toàn bộ ảnh trong thư mục:
 python -m src.predict_attention --image duong_dan_thu_muc/
 ```
 
@@ -85,21 +120,48 @@ python -m src.predict_attention --image duong_dan_thu_muc/
     python -m src.prepare_data
     ```
 
-### B. Huấn luyện lại mô hình từ đầu (Training From Scratch)
-Nếu bạn muốn tự train lại thay vì dùng checkpoint có sẵn:
+### B. Huấn luyện mô hình (Training)
+
+#### B1. CTC Baseline
+```bash
+python -m src.train_ctc_baseline
+```
+*Huấn luyện CTC Baseline qua 50 epoch, tự động đóng băng Encoder 5 epoch đầu rồi mở khóa fine-tune. Checkpoint tốt nhất lưu tại `checkpoints/best_ctc_baseline.pth`.*
+
+#### B2. Attention Model
 ```bash
 python -m src.train_attention
 ```
-*Huấn luyện tự động qua 2 phase: Đóng băng Encoder 5 epoch đầu; mở khóa từ epoch 5 để fine-tune. Checkpoint tốt nhất tự động lưu tại `checkpoints/attention_bilstm/best_attention_model.pth`.*
+*Huấn luyện Attention Model qua 80 epoch với Teacher Forcing giảm dần. Checkpoint tốt nhất lưu tại `checkpoints/attention_bilstm/best_attention_model.pth`.*
 
-### C. Đánh giá mô hình trên tập kiểm thử (`src.evaluate_attention`)
+### C. Đánh giá mô hình trên tập kiểm thử
+
+#### C1. CTC Baseline
+```bash
+python -m src.evaluate_ctc_baseline --checkpoint checkpoints/best_ctc_baseline.pth
+```
+*(Dự đoán chi tiết từng ảnh được lưu ra file `outputs/predictions_ctc.csv`)*
+
+#### C2. Attention Model
 Đánh giá độ chính xác (Word Accuracy, CER, NED) trên 9,684 mẫu test:
 ```bash
 python -m src.evaluate_attention --checkpoint checkpoints/attention_bilstm/best_attention_model.pth
 ```
 *(Dự đoán chi tiết từng ảnh được lưu ra file `outputs/predictions.csv`)*
 
-### D. Nhận dạng ảnh thực tế (`src.predict_attention`)
+### D. Nhận dạng ảnh thực tế
+
+#### D1. CTC Baseline (`src.predict_ctc`)
+*   **Ảnh đơn lẻ:**
+    ```bash
+    python -m src.predict_ctc --image duong_dan_anh.png
+    ```
+*   **Toàn bộ thư mục ảnh (tên file = nhãn chuẩn):**
+    ```bash
+    python -m src.predict_ctc --image duong_dan_thu_muc/
+    ```
+
+#### D2. Attention Model (`src.predict_attention`)
 *   **Ảnh đơn lẻ (Greedy Decode & Lưu Attention Map):**
     ```bash
     python -m src.predict_attention --image duong_dan_anh.png --save_attention
