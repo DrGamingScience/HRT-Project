@@ -189,8 +189,8 @@ Dưới đây là bảng phân công công việc chi tiết cho các thành vi�
 
 | STT | Họ và tên | MSSV | Nhiệm vụ cụ thể | Đóng góp |
 | :---: | :--- | :---: | :--- | :---: |
-| 1 | **Nguyễn Trí Hiếu** | 202416203 | - Thu thập, chuẩn bị và làm sạch dữ liệu IAM (`prepare_data.py`).<br>- Triển khai mô hình baseline **CTC Baseline** (ResNet18 + BiLSTM + CTC Loss).<br>- Xây dựng pipeline huấn luyện, đánh giá cho CTC Baseline.<br>- Biên soạn báo cáo kỹ thuật tổng hợp và chuyển đổi sang báo cáo LaTeX (`Report_HTR`). | 100% |
-| 2 | **Đỗ Hải Đăng** | 202400035 | - Triển khai cấu trúc Encoder-Decoder dùng chung và trích xuất đặc trưng với ResNet18.<br>- Thiết kế và triển khai mô hình chính **Attention Model** (Bahdanau Attention + GRU Decoder).<br>- Xây dựng pipeline huấn luyện, tinh chỉnh siêu tham số và Teacher Forcing.<br>- Chuẩn bị tài liệu thuyết trình (slides) và dàn ý báo cáo. | 100% |
+| 1 | **Nguyễn Trí Hiếu** | 202416203 | - Thu thập, chuẩn bị và làm sạch dữ liệu IAM (`prepare_data.py`).<br>- Thiết kế và triển khai mô hình chính **Attention Model** (Bahdanau Attention + GRU Decoder).<br>- Xây dựng pipeline huấn luyện, tinh chỉnh siêu tham số và Teacher Forcing cho Attention Model.<br>- Biên soạn báo cáo kỹ thuật tổng hợp và chuyển đổi sang báo cáo LaTeX (`Report_HTR`). | 100% |
+| 2 | **Đỗ Hải Đăng** | 202400035 | - Triển khai cấu trúc Encoder-Decoder dùng chung và trích xuất đặc trưng với ResNet18.<br>- Triển khai mô hình baseline **CTC Baseline** (ResNet18 + BiLSTM + CTC Loss).<br>- Xây dựng pipeline huấn luyện, đánh giá cho CTC Baseline.<br>- Chuẩn bị tài liệu thuyết trình (slides) và dàn ý báo cáo. | 100% |
 | 3 | **Đinh Thái Sơn** | 202416746 | - Triển khai các thuật toán giải mã ở thư mục `inference/` (CTC decode, Greedy decode, Beam Search).<br>- Viết mã nguồn tính toán các chỉ số đánh giá (Word Accuracy, CER, NED).<br>- Phát triển công cụ trực quan hóa Attention Map (`save_attention_map`).<br>- Viết script dự đoán ảnh thực tế (`predict.py`) và thực hiện kiểm thử hệ thống. | 100% |
 
 ---
