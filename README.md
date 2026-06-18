@@ -4,7 +4,7 @@ Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử d�
 
 | Mô hình | Kiến trúc | Word Accuracy | CER |
 |---|---|---|---|
-| **CTC Baseline** | ResNet18 + BiLSTM + CTC Loss | *(chạy evaluate để cập nhật)* | *(chạy evaluate để cập nhật)* |
+| **CTC Baseline** | ResNet18 + BiLSTM + CTC Loss | **80.75%** | **7.27%** |
 | **Attention (Proposed)** | ResNet18 + BiLSTM + Bahdanau Attention + GRU Decoder | **83.09%** | **7.06%** |
 
 ---
@@ -38,7 +38,8 @@ HRT-Project/
 ├── powerpoint/                     # Tài liệu phục vụ thiết kế slide thuyết trình
 │   └── slides_outline.md           # Dàn ý chi tiết 10 slide thuyết trình & lời thoại gợi ý
 ├── checkpoints/                    # Thư mục chứa trọng số mô hình (.pth)
-│   ├── best_ctc_baseline.pth      #   └─ Checkpoint tốt nhất CTC Baseline
+│   ├── ctc_baseline/
+│   │   └── best_ctc_baseline.pth  #   └─ Checkpoint tốt nhất CTC Baseline
 │   └── attention_bilstm/
 │       └── best_attention_model.pth #  └─ Checkpoint tốt nhất Attention
 ├── dataset/                        # Dữ liệu ảnh words/ và nhãn label.txt (Tải riêng)
@@ -69,7 +70,7 @@ Do kích thước lớn, các file nặng được lưu trên Google Drive. Tả
 Sau khi tải checkpoint, đặt file vào đúng vị trí:
 ```
 checkpoints/attention_bilstm/best_attention_model.pth
-checkpoints/best_ctc_baseline.pth
+checkpoints/ctc_baseline/best_ctc_baseline.pth
 ```
 
 ### 3. Chuẩn bị dữ liệu
@@ -126,7 +127,7 @@ python -m src.predict_attention --image duong_dan_thu_muc/
 ```bash
 python -m src.train_ctc_baseline
 ```
-*Huấn luyện CTC Baseline qua 50 epoch, tự động đóng băng Encoder 5 epoch đầu rồi mở khóa fine-tune. Checkpoint tốt nhất lưu tại `checkpoints/best_ctc_baseline.pth`.*
+*Huấn luyện CTC Baseline qua 50 epoch, tự động đóng băng Encoder 5 epoch đầu rồi mở khóa fine-tune. Checkpoint tốt nhất lưu tại `checkpoints/ctc_baseline/best_ctc_baseline.pth`.*
 
 #### B2. Attention Model
 ```bash
@@ -138,7 +139,7 @@ python -m src.train_attention
 
 #### C1. CTC Baseline
 ```bash
-python -m src.evaluate_ctc_baseline --checkpoint checkpoints/best_ctc_baseline.pth
+python -m src.evaluate_ctc_baseline --checkpoint checkpoints/ctc_baseline/best_ctc_baseline.pth
 ```
 *(Dự đoán chi tiết từng ảnh được lưu ra file `outputs/predictions_ctc.csv`)*
 

@@ -178,7 +178,7 @@ def main():
     
     best_cer = float("inf")
     epochs_no_improve = 0
-    checkpoint_filename = os.path.join(config.CHECKPOINT_DIR, "last_ctc_baseline.pth")
+    checkpoint_filename = os.path.join(config.CHECKPOINT_DIR, "ctc_baseline", "last_ctc_baseline.pth")
     
     # 6. Vòng lặp huấn luyện chính
     for epoch in range(config.CTC_EPOCHS):

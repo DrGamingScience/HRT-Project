@@ -135,9 +135,9 @@ Kết quả thực tế thu được từ checkpoint tốt nhất của cả hai
 
 | Chỉ số (Metrics) | CTC Baseline | Attention Model (Đề xuất) |
 |---|---|---|
-| **Word Accuracy (WA)** | *(chạy evaluate để cập nhật)* | **83.09%** |
-| **Character Error Rate (CER)** | *(chạy evaluate để cập nhật)* | **7.06%** |
-| **Normalized Edit Distance (NED)** | *(chạy evaluate để cập nhật)* | **94.21%** |
+| **Word Accuracy (WA)** | **80.75%** | **83.09%** |
+| **Character Error Rate (CER)** | **7.27%** | **7.06%** |
+| **Normalized Edit Distance (NED)** | **94.16%** | **94.21%** |
 | **Epoch đạt kết quả tốt nhất** | — | Epoch 62 / 80 |
 | **Dung lượng file checkpoint** | ~75 MB | ~91 MB |
 

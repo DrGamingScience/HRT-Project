@@ -6,6 +6,12 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+import sys
+import io
+
+# Ép kiểu stdout sử dụng UTF-8 trên Windows để tránh crash khi in tiếng Việt
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 import src.config as config
 from src.data.vocab import Vocabulary
 from src.data.dataset import HTRDataset, collate_fn

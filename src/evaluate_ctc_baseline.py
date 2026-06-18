@@ -6,6 +6,12 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+import sys
+import io
+
+# Ép kiểu stdout sử dụng UTF-8 trên Windows để tránh crash khi in tiếng Việt
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 import src.config as config
 from src.data.vocab import Vocabulary
 from src.data.dataset import HTRDataset, collate_fn
@@ -112,7 +118,7 @@ def evaluate_ctc_test_set(checkpoint_path: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate CTC Baseline Model on Test Set.")
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/best_ctc_baseline.pth",
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/ctc_baseline/best_ctc_baseline.pth",
                         help="Đường dẫn đến file checkpoint (.pth).")
     
     args = parser.parse_args()

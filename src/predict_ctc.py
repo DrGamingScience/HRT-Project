@@ -115,7 +115,7 @@ def predict_path(path: str, checkpoint_path: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Predict single image or folder of images using CTC Baseline Model.")
     parser.add_argument("--image", type=str, required=True, help="Đường dẫn đến file ảnh hoặc thư mục ảnh cần nhận dạng.")
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/best_ctc_baseline.pth", 
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/ctc_baseline/best_ctc_baseline.pth", 
                         help="Đường dẫn đến file checkpoint (.pth).")
     
     args = parser.parse_args()
