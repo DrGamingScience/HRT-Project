@@ -125,8 +125,11 @@ Hệ thống hỗ trợ chuyển đổi linh hoạt thông qua cấu hình mã n
 
 ---
 
-## Phân công nhiệm vụ trong nhóm
+## Phân công nhiệm vụ thành viên
 
-- **Nguyễn Trí Hiếu:** Chuẩn bị dữ liệu (`prepare_data.py`), xây dựng và huấn luyện mô hình chính Attention Model (Decoder, Attention, pipeline train/val), viết báo cáo LaTeX.
-- **Đỗ Hải Đăng:** Triển khai ResNet18 Encoder, xây dựng và huấn luyện mô hình CTC Baseline, chuẩn bị tài liệu và slide thuyết trình.
-- **Đinh Thái Sơn:** Phát triển các thuật toán giải mã (Greedy, Beam Search) trong `inference/`, cài đặt metric đánh giá, viết công cụ visualization và các script nhận dạng thực tế (`predict.py`).
+| STT | Thành viên | Vai trò và nhiệm vụ chính | Đóng góp |
+| :---: | :--- | :--- | :---: |
+| 1 | **Nguyễn Trí Hiếu** | - Chuẩn bị và làm sạch dữ liệu (`prepare_data.py`).<br>- Thiết kế, triển khai mô hình chính **Attention Model** (Bahdanau Attention + GRU Decoder).<br>- Xây dựng pipeline huấn luyện, tinh chỉnh hyperparameter và Teacher Forcing decay.<br>- Biên soạn nội dung báo cáo kỹ thuật và chuyển đổi sang LaTeX. | 100% |
+| 2 | **Đỗ Hải Đăng** | - Triển khai cấu trúc Encoder-Decoder dùng chung và trích xuất đặc trưng với ResNet18.<br>- Triển khai mô hình đối chứng **CTC Baseline** (ResNet18 + BiLSTM + CTC Loss).<br>- Xây dựng pipeline huấn luyện và đánh giá cho CTC Baseline.<br>- Thiết kế cấu trúc slide thuyết trình. | 100% |
+| 3 | **Đinh Thái Sơn** | - Triển khai các thuật toán giải mã tại thư mục `inference/` (CTC Greedy, Attention Greedy, Beam Search).<br>- Viết hàm tính toán chỉ số đánh giá (Word Accuracy, CER, NED).<br>- Phát triển công cụ trực quan hóa Attention Map và các script dự đoán ảnh thực tế (`predict.py`). | 100% |
+
