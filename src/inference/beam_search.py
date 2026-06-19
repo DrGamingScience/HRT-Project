@@ -69,6 +69,14 @@ def beam_search_decode(model: torch.nn.Module, image: torch.Tensor, vocab: Vocab
             # Sắp xếp các ứng viên chưa hoàn thành và giữ lại top beam_width
             new_beams = sorted(candidates, key=lambda x: x[0], reverse=True)[:beam_width]
             
+            # --- ĐOẠN CODE IN DEBUG TỪNG BƯỚC CHO BEAM SEARCH ---
+            print(f"  [Beam Step {t:02d}] Các nhánh hoạt động (Top {len(new_beams)}):")
+            for rank, (score, seq, _, _) in enumerate(new_beams):
+                temp_word = vocab.decode(seq, stop_at_eos=False)
+                last_char = vocab.idx_to_char_fn(seq[-1]) if seq[-1] in vocab._idx_to_char else "UNKNOWN"
+                print(f"    Nhánh #{rank+1}: '{temp_word:15s}' (Ký tự cuối: '{last_char:5s}', Score: {score:.4f})")
+            # --------------------------------------------------
+            
             # Nếu không còn nhánh nào hoạt động (tất cả đã gặp <eos>), dừng vòng lặp sớm
             if not new_beams:
                 break

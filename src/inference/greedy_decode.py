@@ -44,6 +44,13 @@ def greedy_decode(model: torch.nn.Module, images: torch.Tensor, vocab: Vocabular
             # Dự đoán nhãn có điểm số cao nhất (Greedy)
             preds = logits.argmax(dim=-1)  # (B,)
             
+            # --- ĐOẠN CODE IN DEBUG TỪNG BƯỚC CHO MẪU ĐẦU TIÊN (BATCH INDEX 0) ---
+            prob = torch.softmax(logits, dim=-1)
+            top_prob, top_idx = prob.max(dim=-1)
+            step_char = vocab.idx_to_char_fn(top_idx[0].item()) if top_idx[0].item() in vocab._idx_to_char else "UNKNOWN"
+            print(f"  [Debug Step {t:02d}] Ký tự: '{step_char:6s}' | Xác suất: {top_prob[0].item()*100:.2f}% | Index: {top_idx[0].item()}")
+            # --------------------------------------------------------------------
+            
             # Ghi nhận ký tự cho từng mẫu trong batch
             for i in range(batch_size):
                 if not finished[i]:
@@ -60,6 +67,7 @@ def greedy_decode(model: torch.nn.Module, images: torch.Tensor, vocab: Vocabular
                 
             # Cập nhật input cho bước tiếp theo
             input_char = preds
+
             
         # Dịch chuỗi chỉ số thành văn bản
         decoded_words = []
