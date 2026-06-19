@@ -53,8 +53,16 @@ python -m pip install -r requirements.txt
 ```
 
 ### 2. Chuẩn bị dữ liệu và checkpoint
-1. Tải bộ dữ liệu IAM (mức word-level) gồm thư mục `words/` và file `label.txt`. Đặt chúng vào thư mục `dataset/`.
-2. Tải các checkpoint v2 và đặt vào cấu trúc sau:
+Do dung lượng lớn, bộ dữ liệu và các trọng số đã huấn luyện sẵn được lưu trên Google Drive để tải về:
+
+| Tài nguyên | Mô tả | Link tải |
+|---|---|---|
+| `dataset/` (IAM words) | Ảnh viết tay + nhãn gốc (~1.1 GB) | [Tải Dataset (Google Drive)](https://drive.google.com/file/d/1uC2H2NCVvU1pPz-OId8KKfJiyI3nq5lj/view?usp=sharing) |
+| `best_attention_model.pth` | Checkpoint Attention Model (~91 MB) | [Tải Checkpoint (Google Drive)](https://drive.google.com/file/d/1yuN5fDkaIQ7PCj3Q-Kq5-muftEd0w8_a/view?usp=sharing) |
+
+Sau khi tải về, vui lòng đặt đúng cấu trúc thư mục sau:
+1. Đặt bộ dữ liệu IAM vào thư mục `dataset/` (gồm file `label.txt` và thư mục `words/`).
+2. Đặt checkpoint v2 vào cấu trúc sau:
    - `checkpoints/ctc_baseline_v2/best_ctc_baseline.pth`
    - `checkpoints/attention_bilstm_v2/best_attention_model.pth`
 
