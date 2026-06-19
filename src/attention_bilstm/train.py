@@ -197,7 +197,8 @@ def main():
     # Các biến theo dõi huấn luyện
     best_cer = float("inf")
     epochs_no_improve = 0
-    checkpoint_filename = os.path.join(config.CHECKPOINT_DIR, "attention_bilstm", "last_attention_model.pth")
+    # Lưu sang thư mục v2 để tránh ghi đè lên checkpoint tốt nhất cũ
+    checkpoint_filename = os.path.join(config.CHECKPOINT_DIR, "attention_bilstm_v2", "last_attention_model.pth")
     
     # 6. Vòng lặp huấn luyện chính
     for epoch in range(config.NUM_EPOCHS):

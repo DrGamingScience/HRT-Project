@@ -1,11 +1,21 @@
 # Word-Level Handwritten Text Recognition (HTR)
 
-Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử dụng PyTorch chạy local. Dự án xây dựng và so sánh **hai kiến trúc** trên bộ dữ liệu IAM (96,835 mẫu):
+Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử dụng PyTorch chạy local. Dự án xây dựng và so sánh **hai kiến trúc** trên bộ dữ liệu IAM ở hai phiên bản (Phase):
 
-| Mô hình | Kiến trúc | Word Accuracy | CER |
-|---|---|---|---|
-| **CTC Baseline** | ResNet18 + BiLSTM + CTC Loss | **80.75%** | **7.27%** |
-| **Attention (Proposed)** | ResNet18 + BiLSTM + Bahdanau Attention + GRU Decoder | **83.09%** | **7.06%** |
+### 📊 Bảng so sánh kết quả trên Test Set
+
+#### 🔹 Phase 1: Nhận dạng chữ thường (Vocabulary: 26 ký tự)
+| Mô hình | Kiến trúc | Phương pháp giải mã | Word Accuracy | CER |
+|---|---|---|---|---|
+| **CTC Baseline** | ResNet18 + BiLSTM + CTC Loss | CTC Greedy | **80.75%** | **7.27%** |
+| **Attention (Proposed)** | ResNet18 + BiLSTM + Attention + GRU Decoder | Greedy Decode | **83.09%** | **7.06%** |
+
+#### 🔹 Phase 2: Nhận dạng chữ hoa, chữ thường và dấu câu (Vocabulary: 76 ký tự)
+| Mô hình | Kiến trúc | Phương pháp giải mã | Word Accuracy | CER |
+|---|---|---|---|---|
+| **CTC Baseline (v2)** | ResNet18 + BiLSTM + CTC Loss | CTC Greedy | **79.95%** | **8.25%** |
+| **Attention (Proposed v2)** | ResNet18 + BiLSTM + Attention + GRU Decoder | Greedy Decode | **82.67%** | **7.79%** |
+| **Attention (Proposed v2)** | ResNet18 + BiLSTM + Attention + GRU Decoder | **Beam Search (width=2)** | **82.84%** | **7.74%** |
 
 ---
 
@@ -83,30 +93,38 @@ python -m src.prepare_data
 
 ### 4. Đánh giá mô hình trên tập kiểm thử (Test Set)
 ```bash
-# Đánh giá CTC Baseline:
+# --- CTC Baseline ---
+# Mặc định (Phase 1):
 python -m src.ctc_baseline.evaluate
+# Bản nâng cao (Phase 2 - v2):
+python -m src.ctc_baseline.evaluate --checkpoint checkpoints/ctc_baseline_v2/best_ctc_baseline.pth
 
-# Đánh giá Attention Model:
+# --- Attention Model ---
+# Mặc định (Phase 1):
 python -m src.attention_bilstm.evaluate
+# Bản nâng cao (Phase 2 - v2):
+python -m src.attention_bilstm.evaluate --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth
+# Bản nâng cao (Phase 2 - v2) chạy Beam Search:
+python -m src.attention_bilstm.evaluate --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth --beam
 ```
 
 ### 5. Chạy dự đoán thực tế
 > **Lưu ý:** Tham số `--image` nhận được cả **đường dẫn file ảnh** lẫn **đường dẫn thư mục**.
 
 ```bash
-# --- CTC Baseline ---
+# --- CTC Baseline (v2) ---
 # Nhận dạng một ảnh đơn lẻ:
-python -m src.ctc_baseline.predict --image duong_dan_anh.png
-
-# Nhận dạng toàn bộ ảnh trong thư mục (tên file không có đuôi = nhãn chuẩn):
-python -m src.ctc_baseline.predict --image duong_dan_thu_muc/
-
-# --- Attention Model ---
-# Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý:
-python -m src.attention_bilstm.predict --image duong_dan_anh.png --save_attention
+python -m src.ctc_baseline.predict --image duong_dan_anh.png --checkpoint checkpoints/ctc_baseline_v2/best_ctc_baseline.pth
 
 # Nhận dạng toàn bộ ảnh trong thư mục:
-python -m src.attention_bilstm.predict --image duong_dan_thu_muc/
+python -m src.ctc_baseline.predict --image duong_dan_thu_muc/ --checkpoint checkpoints/ctc_baseline_v2/best_ctc_baseline.pth
+
+# --- Attention Model (v2) ---
+# Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý:
+python -m src.attention_bilstm.predict --image duong_dan_anh.png --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth --save_attention
+
+# Nhận dạng toàn bộ ảnh trong thư mục:
+python -m src.attention_bilstm.predict --image duong_dan_thu_muc/ --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth
 ```
 
 ---

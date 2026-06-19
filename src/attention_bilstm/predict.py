@@ -61,8 +61,8 @@ def predict_path(path: str, checkpoint_path: str, save_attention: bool = False, 
         all_predictions = []
         
         for f in files:
-            # Lấy nhãn chuẩn từ tên file (chuyển sang chữ thường)
-            label = os.path.splitext(f)[0].lower()
+            # Lấy nhãn chuẩn từ tên file (giữ nguyên hoa/thường)
+            label = os.path.splitext(f)[0]
             all_targets.append(label)
             
             img_path = os.path.join(path, f)

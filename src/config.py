@@ -31,8 +31,9 @@ IMAGE_CHANNELS = 3         # 3 vì ResNet18 pretrained cần RGB
 # --- Vocabulary ---
 MAX_LABEL_LENGTH = 32
 MIN_LABEL_LENGTH = 1
-# Bộ ký tự chuẩn tiếng Anh (chữ thường) dùng cho Phase 1
-VOCAB_CHARS = "abcdefghijklmnopqrstuvwxyz"
+# Bộ ký tự tiếng Anh đầy đủ (chữ thường, chữ hoa, số và ký tự đặc biệt)
+VOCAB_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#&()*+,-./:;?"
+
 
 # --- Model ---
 ENCODER_MODEL = "resnet18"
@@ -79,7 +80,7 @@ CTC_HIDDEN_DIM = 256
 CTC_NUM_LAYERS = 2
 CTC_LEARNING_RATE = 1e-3
 CTC_BATCH_SIZE = 256
-CTC_EPOCHS = 50
+CTC_EPOCHS = 80
 
 # --- Device ---
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

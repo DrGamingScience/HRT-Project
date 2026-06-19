@@ -75,8 +75,9 @@ def prepare_data():
         # Giải mã các ký tự HTML (ví dụ: &apos; -> ', &quot; -> ")
         clean_label = html.unescape(raw_label).strip()
 
-        # Lowercase nhãn (vì Phase 1 chỉ dùng bộ chữ thường a-z)
-        clean_label = clean_label.lower()
+        # Giữ nguyên chữ hoa và ký tự đặc biệt
+        # clean_label = clean_label.lower()
+
 
         # Xử lý trường hợp nhãn rỗng trước khi kiểm tra sâu hơn
         if not clean_label:
