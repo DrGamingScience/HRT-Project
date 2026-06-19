@@ -1,219 +1,132 @@
 # Word-Level Handwritten Text Recognition (HTR)
 
-Hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ sử dụng PyTorch chạy local. Dự án xây dựng và so sánh **hai kiến trúc** trên bộ dữ liệu IAM ở hai phiên bản (Phase):
+Dự án xây dựng hệ thống nhận dạng chữ viết tay mức độ từ đơn lẻ (Word-level HTR) chạy local bằng PyTorch. Hệ thống được phát triển và đánh giá trên bộ dữ liệu IAM Handwriting Dataset mức độ word-level, so sánh hai hướng tiếp cận: CTC Baseline (ResNet18 + BiLSTM + CTC Loss) và Attention Model (ResNet18 + Context BiLSTM + Bahdanau Attention + GRU Decoder).
 
-### 📊 Bảng so sánh kết quả trên Test Set
+## Phiên bản mô hình (Model Versions)
 
-#### 🔹 Phase 1: Nhận dạng chữ thường (Vocabulary: 26 ký tự)
-| Mô hình | Kiến trúc | Phương pháp giải mã | Word Accuracy | CER |
-|---|---|---|---|---|
-| **CTC Baseline** | ResNet18 + BiLSTM + CTC Loss | CTC Greedy | **80.75%** | **7.27%** |
-| **Attention (Proposed)** | ResNet18 + BiLSTM + Attention + GRU Decoder | Greedy Decode | **83.09%** | **7.06%** |
+Dự án trải qua hai giai đoạn phát triển chính:
+- **Phase 1 (v1 - Thử nghiệm ban đầu):** Mô hình chỉ hỗ trợ từ vựng gồm 26 chữ cái tiếng Anh viết thường (a-z). Tổng số mẫu sau làm sạch là 96,835. Đây là phiên bản dùng để đánh giá tính khả thi và thiết lập pipeline ban đầu.
+- **Phase 2 (v2 - Phiên bản chính thức/Final):** Bộ từ vựng mở rộng lên 76 ký tự bao gồm chữ thường, chữ hoa, chữ số và các ký tự đặc biệt (`abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#&()*+,-./:;?`). Dữ liệu giữ nguyên định dạng viết tay thực tế của IAM với 111,706 mẫu. Các checkpoint huấn luyện và lệnh chạy dưới đây mặc định áp dụng cho phiên bản v2 này.
 
-#### 🔹 Phase 2: Nhận dạng chữ hoa, chữ thường và dấu câu (Vocabulary: 76 ký tự)
-| Mô hình | Kiến trúc | Phương pháp giải mã | Word Accuracy | CER |
-|---|---|---|---|---|
-| **CTC Baseline (v2)** | ResNet18 + BiLSTM + CTC Loss | CTC Greedy | **79.95%** | **8.25%** |
-| **Attention (Proposed v2)** | ResNet18 + BiLSTM + Attention + GRU Decoder | Greedy Decode | **82.67%** | **7.79%** |
-| **Attention (Proposed v2)** | ResNet18 + BiLSTM + Attention + GRU Decoder | **Beam Search (width=2)** | **82.84%** | **7.74%** |
+### Bảng kết quả trên tập kiểm thử (Test Set)
+
+| Phiên bản | Mô hình | Giải mã | Word Accuracy | CER | NED |
+|---|---|---|---|---|---|
+| **Phase 2 (v2 - Final)** | CTC Baseline | CTC Greedy | 79.95% | 8.25% | 93.13% |
+| | Attention Model | Greedy Decode | 82.67% | 7.79% | 93.32% |
+| | Attention Model | Beam Search (K=2) | 82.84% | 7.74% | 93.35% |
+| *Phase 1 (v1)* | CTC Baseline | CTC Greedy | 80.75% | 7.27% | 94.16% |
+| | Attention Model | Greedy Decode | 83.09% | 7.06% | 94.21% |
+
+*Lưu ý: Kết quả của Phase 1 cao hơn một chút do không gian từ vựng nhỏ hơn (26 ký tự so với 76 ký tự của Phase 2).*
 
 ---
 
-## 📁 Cấu trúc thư mục dự án
+## Cấu trúc thư mục
 
 ```text
 HRT-Project/
-├── src/                            # Mã nguồn chính của dự án
+├── src/                            # Mã nguồn chính
 │   ├── data/                       # Dataloader, transforms và vocab
-│   ├── models/                     # Kiến trúc mô hình
-│   │   ├── ctc_baseline.py        #   └─ CTC Baseline (ResNet18 + BiLSTM + CTC)
-│   │   ├── resnet_encoder.py      #   └─ CNN Encoder dùng chung
-│   │   ├── attention.py           #   └─ Bahdanau Attention
-│   │   ├── attention_model.py     #   └─ Attention Model tổng hợp
-│   │   └── gru_decoder.py         #   └─ GRU Decoder
-│   ├── inference/                  # Các giải thuật giải mã
-│   │   ├── ctc_decode.py          #   └─ CTC Greedy Decoding
-│   │   ├── greedy_decode.py       #   └─ Attention Greedy Decoding
-│   │   └── beam_search.py         #   └─ Attention Beam Search
-│   ├── utils/                      # Tiện ích (metrics, checkpoint, seed, visualization)
-│   ├── ctc_baseline/               # Pipeline mô hình CTC Baseline
-│   │   ├── train.py                #   └─ Script huấn luyện
-│   │   ├── evaluate.py             #   └─ Đánh giá trên Test Set
-│   │   └── predict.py              #   └─ Dự đoán ảnh đơn / thư mục
-│   ├── attention_bilstm/           # Pipeline mô hình Attention Model
-│   │   ├── train.py                #   └─ Script huấn luyện
-│   │   ├── evaluate.py             #   └─ Đánh giá trên Test Set
-│   │   └── predict.py              #   └─ Dự đoán ảnh đơn / thư mục
+│   ├── models/                     # Kiến trúc mô hình (ResNet, Attention, GRU)
+│   ├── inference/                  # Thuật toán giải mã (Greedy, Beam Search)
+│   ├── utils/                      # Tiện ích tính metric, save/load checkpoint, visualization
+│   ├── ctc_baseline/               # Pipeline huấn luyện & suy diễn cho CTC
+│   ├── attention_bilstm/           # Pipeline huấn luyện & suy diễn cho Attention
 │   └── prepare_data.py            # Tiền xử lý & chia dữ liệu
-├── report/                         # Báo cáo kỹ thuật chi tiết phục vụ viết báo cáo/LaTeX
-│   └── project_report.md           # [BÁO CÁO TỔNG HỢP DUY NHẤT]
-├── powerpoint/                     # Tài liệu phục vụ thiết kế slide thuyết trình
-│   └── slides_outline.md           # Dàn ý chi tiết 10 slide thuyết trình & lời thoại gợi ý
-├── checkpoints/                    # Thư mục chứa trọng số mô hình (.pth)
-│   ├── ctc_baseline/
-│   │   └── best_ctc_baseline.pth  #   └─ Checkpoint tốt nhất CTC Baseline
-│   └── attention_bilstm/
-│       └── best_attention_model.pth #  └─ Checkpoint tốt nhất Attention
-├── dataset/                        # Dữ liệu ảnh words/ và nhãn label.txt (Tải riêng)
-├── requirements.txt                # Danh sách thư viện phụ thuộc
-└── README.md                       # Hướng dẫn nhanh này
+├── checkpoints/                    # Thư mục lưu trọng số mô hình (.pth)
+│   ├── ctc_baseline_v2/            # Checkpoint v2 cho CTC Baseline
+│   └── attention_bilstm_v2/        # Checkpoint v2 cho Attention Model
+├── dataset/                        # Thư mục chứa ảnh và nhãn gốc (tải riêng)
+├── requirements.txt                # Thư viện phụ thuộc
+└── README.md                       # File hướng dẫn này
 ```
 
 ---
 
-## ⚡ Hướng dẫn chạy nhanh (Quickstart)
+## Hướng dẫn cài đặt và chạy nhanh
 
-### 1. Cài đặt môi trường
-Xem chi tiết hướng dẫn cài đặt Python 3.11, PyTorch CUDA tương thích với card đồ họa tại [report/project_report.md (Mục 3)](file:///d:/Downloads/HRT-Project/report/project_report.md).
-Sau khi kích hoạt môi trường:
+### 1. Môi trường và thư viện
+Kích hoạt môi trường Python 3.11 của bạn và cài đặt các thư viện cần thiết:
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 2. Tải dữ liệu & checkpoint
-Do kích thước lớn, các file nặng được lưu trên Google Drive. Tải về và đặt đúng cấu trúc thư mục:
+### 2. Chuẩn bị dữ liệu và checkpoint
+1. Tải bộ dữ liệu IAM (mức word-level) gồm thư mục `words/` và file `label.txt`. Đặt chúng vào thư mục `dataset/`.
+2. Tải các checkpoint v2 và đặt vào cấu trúc sau:
+   - `checkpoints/ctc_baseline_v2/best_ctc_baseline.pth`
+   - `checkpoints/attention_bilstm_v2/best_attention_model.pth`
 
-| File | Mô tả | Link |
-|---|---|---|
-| `dataset/` (IAM words) | Ảnh + nhãn gốc (~1.1 GB) | [Tải dataset](https://drive.google.com/file/d/1uC2H2NCVvU1pPz-OId8KKfJiyI3nq5lj/view?usp=sharing) |
-| `best_attention_model.pth` | Checkpoint Attention (~91 MB) | [Tải checkpoint](https://drive.google.com/file/d/1yuN5fDkaIQ7PCj3Q-Kq5-muftEd0w8_a/view?usp=sharing) |
-| `best_ctc_baseline.pth` | Checkpoint CTC Baseline (~75 MB) | *(có sẵn trong repo)* |
-
-Sau khi tải checkpoint, đặt file vào đúng vị trí:
-```
-checkpoints/attention_bilstm/best_attention_model.pth
-checkpoints/ctc_baseline/best_ctc_baseline.pth
-```
-
-### 3. Chuẩn bị dữ liệu
-Đặt bộ dữ liệu IAM vào thư mục `dataset/` (gồm file `label.txt` và thư mục `words/`). Sau đó chạy lệnh chia tập dữ liệu:
+Chạy script để làm sạch nhãn, lọc ảnh lỗi và chia tập train/val/test (tỉ lệ 80/10/10):
 ```bash
 python -m src.prepare_data
 ```
 
-### 4. Đánh giá mô hình trên tập kiểm thử (Test Set)
+*Lưu ý: Mặc định script sẽ chạy theo cấu hình Phase 2 (giữ nguyên chữ hoa, chữ số và dấu câu). Để chuyển đổi cấu hình hoặc huấn luyện lại phiên bản Phase 1, xem mục Hướng dẫn chuyển cấu hình ở cuối.*
+
+### 3. Đánh giá trên tập kiểm thử (Test Set)
+
+Đánh giá mô hình v2 bằng các lệnh sau:
+
 ```bash
-# --- CTC Baseline ---
-# Mặc định (Phase 1):
-python -m src.ctc_baseline.evaluate
-# Bản nâng cao (Phase 2 - v2):
+# Đánh giá CTC Baseline v2
 python -m src.ctc_baseline.evaluate --checkpoint checkpoints/ctc_baseline_v2/best_ctc_baseline.pth
 
-# --- Attention Model ---
-# Mặc định (Phase 1):
-python -m src.attention_bilstm.evaluate
-# Bản nâng cao (Phase 2 - v2):
+# Đánh giá Attention Model v2 (Greedy Decode)
 python -m src.attention_bilstm.evaluate --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth
-# Bản nâng cao (Phase 2 - v2) chạy Beam Search:
+
+# Đánh giá Attention Model v2 (Beam Search)
 python -m src.attention_bilstm.evaluate --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth --beam
 ```
 
-### 5. Chạy dự đoán thực tế
-> **Lưu ý:** Tham số `--image` nhận được cả **đường dẫn file ảnh** lẫn **đường dẫn thư mục**.
+### 4. Suy diễn trên ảnh thực tế
+Nhận dạng một ảnh hoặc cả thư mục ảnh (tên file ảnh dùng làm nhãn so sánh nếu có):
 
 ```bash
-# --- CTC Baseline (v2) ---
-# Nhận dạng một ảnh đơn lẻ:
-python -m src.ctc_baseline.predict --image duong_dan_anh.png --checkpoint checkpoints/ctc_baseline_v2/best_ctc_baseline.pth
+# Sử dụng CTC Baseline v2
+python -m src.ctc_baseline.predict --image path/to/image.png --checkpoint checkpoints/ctc_baseline_v2/best_ctc_baseline.pth
 
-# Nhận dạng toàn bộ ảnh trong thư mục:
-python -m src.ctc_baseline.predict --image duong_dan_thu_muc/ --checkpoint checkpoints/ctc_baseline_v2/best_ctc_baseline.pth
+# Sử dụng Attention Model v2 (sinh attention map)
+python -m src.attention_bilstm.predict --image path/to/image.png --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth --save_attention
 
-# --- Attention Model (v2) ---
-# Nhận dạng một ảnh đơn lẻ và trực quan hóa bản đồ chú ý:
-python -m src.attention_bilstm.predict --image duong_dan_anh.png --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth --save_attention
-
-# Nhận dạng toàn bộ ảnh trong thư mục:
-python -m src.attention_bilstm.predict --image duong_dan_thu_muc/ --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth
+# Sử dụng Attention Model v2 với giải mã Beam Search
+python -m src.attention_bilstm.predict --image path/to/image.png --checkpoint checkpoints/attention_bilstm_v2/best_attention_model.pth --beam
 ```
 
 ---
 
-## 📖 Hướng dẫn chạy chi tiết từng Tiến trình
+## Chi tiết các bước huấn luyện (Training)
 
-<details>
-<summary><b>Xem chi tiết các câu lệnh và tham số nâng cao (Click để mở rộng)</b></summary>
+Nếu bạn muốn huấn luyện lại các mô hình từ đầu:
 
-### A. Tiền xử lý dữ liệu (`src.prepare_data`)
-*   **Chức năng:** Làm sạch nhãn (lowercase, bỏ ký tự đặc biệt), lọc ảnh lỗi, chia dữ liệu thành 3 tập `train.csv`, `val.csv`, `test.csv` lưu trong `data_processed/`.
-*   **Lệnh chạy:**
-    ```bash
-    python -m src.prepare_data
-    ```
-
-### B. Huấn luyện mô hình (Training)
-
-#### B1. CTC Baseline
+### CTC Baseline
 ```bash
 python -m src.ctc_baseline.train
 ```
-*Huấn luyện CTC Baseline qua 50 epoch, tự động đóng băng Encoder 5 epoch đầu rồi mở khóa fine-tune. Checkpoint tốt nhất lưu tại `checkpoints/ctc_baseline/best_ctc_baseline.pth`.*
+Trọng số tốt nhất được lưu tại `checkpoints/ctc_baseline_v2/best_ctc_baseline.pth`. Quá trình train sẽ freeze ResNet18 trong 5 epoch đầu và unfreeze để fine-tune ở các epoch tiếp theo.
 
-#### B2. Attention Model
+### Attention Model
 ```bash
 python -m src.attention_bilstm.train
 ```
-*Huấn luyện Attention Model qua 80 epoch với Teacher Forcing giảm dần. Checkpoint tốt nhất lưu tại `checkpoints/attention_bilstm/best_attention_model.pth`.*
-
-### C. Đánh giá mô hình trên tập kiểm thử
-
-#### C1. CTC Baseline
-```bash
-python -m src.ctc_baseline.evaluate --checkpoint checkpoints/ctc_baseline/best_ctc_baseline.pth
-```
-*(Dự đoán chi tiết từng ảnh được lưu ra file `outputs/predictions_ctc.csv`)*
-
-#### C2. Attention Model
-Đánh giá độ chính xác (Word Accuracy, CER, NED) trên 9,684 mẫu test:
-```bash
-python -m src.attention_bilstm.evaluate --checkpoint checkpoints/attention_bilstm/best_attention_model.pth
-```
-*(Dự đoán chi tiết từng ảnh được lưu ra file `outputs/predictions.csv`)*
-
-### D. Nhận dạng ảnh thực tế
-
-#### D1. CTC Baseline (`src.ctc_baseline.predict`)
-*   **Ảnh đơn lẻ:**
-    ```bash
-    python -m src.ctc_baseline.predict --image duong_dan_anh.png
-    ```
-*   **Toàn bộ thư mục ảnh (tên file = nhãn chuẩn):**
-    ```bash
-    python -m src.ctc_baseline.predict --image duong_dan_thu_muc/
-    ```
-
-#### D2. Attention Model (`src.attention_bilstm.predict`)
-*   **Ảnh đơn lẻ (Greedy Decode & Lưu Attention Map):**
-    ```bash
-    python -m src.attention_bilstm.predict --image duong_dan_anh.png --save_attention
-    ```
-    *(Ảnh trực quan hóa attention heatmap được lưu tại `outputs/attention_maps/`)*
-*   **Ảnh đơn lẻ (Beam Search nâng cao):**
-    ```bash
-    python -m src.attention_bilstm.predict --image duong_dan_anh.png --beam
-    ```
-*   **Toàn bộ thư mục ảnh (tên file = nhãn chuẩn):**
-    ```bash
-    python -m src.attention_bilstm.predict --image duong_dan_thu_muc/
-    ```
-
-</details>
+Trọng số tốt nhất được lưu tại `checkpoints/attention_bilstm_v2/best_attention_model.pth`. Mô hình sử dụng cơ chế giảm dần tỉ lệ Teacher Forcing từ 0.5 xuống 0.01 để hạn chế Exposure Bias.
 
 ---
 
-## 👥 Phân công nhiệm vụ thành viên (Task Allocation)
+## Hướng dẫn chuyển đổi cấu hình (Phase 1 vs Phase 2)
 
-Dưới đây là bảng phân công công việc chi tiết cho các thành viên trong nhóm thực hiện dự án:
+Hệ thống hỗ trợ chuyển đổi linh hoạt thông qua cấu hình mã nguồn. Nếu muốn chuyển từ mặc định (Phase 2) về Phase 1 (chữ cái thường):
 
-| STT | Họ và tên | MSSV | Nhiệm vụ cụ thể | Đóng góp |
-| :---: | :--- | :---: | :--- | :---: |
-| 1 | **Nguyễn Trí Hiếu** | 202416203 | - Thu thập, chuẩn bị và làm sạch dữ liệu IAM (`prepare_data.py`).<br>- Thiết kế và triển khai mô hình chính **Attention Model** (Bahdanau Attention + GRU Decoder).<br>- Xây dựng pipeline huấn luyện, tinh chỉnh siêu tham số và Teacher Forcing cho Attention Model.<br>- Biên soạn báo cáo kỹ thuật tổng hợp và chuyển đổi sang báo cáo LaTeX (`Report_HTR`). | 100% |
-| 2 | **Đỗ Hải Đăng** | 202400035 | - Triển khai cấu trúc Encoder-Decoder dùng chung và trích xuất đặc trưng với ResNet18.<br>- Triển khai mô hình baseline **CTC Baseline** (ResNet18 + BiLSTM + CTC Loss).<br>- Xây dựng pipeline huấn luyện, đánh giá cho CTC Baseline.<br>- Chuẩn bị tài liệu thuyết trình (slides) và dàn ý báo cáo. | 100% |
-| 3 | **Đinh Thái Sơn** | 202416746 | - Triển khai các thuật toán giải mã ở thư mục `inference/` (CTC decode, Greedy decode, Beam Search).<br>- Viết mã nguồn tính toán các chỉ số đánh giá (Word Accuracy, CER, NED).<br>- Phát triển công cụ trực quan hóa Attention Map (`save_attention_map`).<br>- Viết script dự đoán ảnh thực tế (`predict.py`) và thực hiện kiểm thử hệ thống. | 100% |
+1. Trong file `src/config.py`: Đặt `VOCAB_CHARS = "abcdefghijklmnopqrstuvwxyz"`.
+2. Trong file `src/prepare_data.py`: Bỏ comment dòng code `clean_label = clean_label.lower()` để chuyển toàn bộ nhãn về chữ thường.
+3. Chạy lại lệnh xử lý dữ liệu: `python -m src.prepare_data`.
+4. Khi chạy các script train/evaluate/predict, chỉ định checkpoint tương ứng của Phase 1 (đặt trong `checkpoints/ctc_baseline/` và `checkpoints/attention_bilstm/`).
 
 ---
 
-## 📄 Tài liệu chi tiết nộp bài
-*   **Dành cho viết báo cáo (Word/LaTeX):** [report/project_report.md](file:///d:/Downloads/HRT-Project/report/project_report.md)
-*   **Dành cho thiết kế slide thuyết trình:** [powerpoint/slides_outline.md](file:///d:/Downloads/HRT-Project/powerpoint/slides_outline.md)
+## Phân công nhiệm vụ trong nhóm
 
+- **Nguyễn Trí Hiếu:** Chuẩn bị dữ liệu (`prepare_data.py`), xây dựng và huấn luyện mô hình chính Attention Model (Decoder, Attention, pipeline train/val), viết báo cáo LaTeX.
+- **Đỗ Hải Đăng:** Triển khai ResNet18 Encoder, xây dựng và huấn luyện mô hình CTC Baseline, chuẩn bị tài liệu và slide thuyết trình.
+- **Đinh Thái Sơn:** Phát triển các thuật toán giải mã (Greedy, Beam Search) trong `inference/`, cài đặt metric đánh giá, viết công cụ visualization và các script nhận dạng thực tế (`predict.py`).
